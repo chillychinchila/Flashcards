@@ -1,3 +1,4 @@
 *.o
 flashcards_gui
-
+.vscode/
+deck.txt

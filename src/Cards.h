@@ -32,6 +32,7 @@ string toLower (string str);
 int LDistance(const string& s1, const string& s2);
 void logResult(bool correct, Card& card);
 
+
 // bool FrontAnswer(string answer, const Card& card)
 // {
 //     cout << "Correct!" << endl;

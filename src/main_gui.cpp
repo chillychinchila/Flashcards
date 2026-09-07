@@ -15,7 +15,10 @@
 #include <string>
 #include <random>
 #include <cstring>
+#include <fstream>
 #include "Cards.h"
+
+const string DECK_FILE = "deck.txt";
 
 using namespace std;
 
@@ -87,6 +90,52 @@ static void restartSession(AppState& s)
     pickNextCard(s);
 }
 
+static void saveDeck(const vector<Card>& deck, const string& filename)
+{
+    ofstream outFile(filename);
+
+    if (!outFile.is_open())
+    {
+        cerr << "Warning: could not open " << filename << " for saving." << endl;
+        return;
+    }
+
+    for (const Card& card : deck)
+    {
+        outFile << card.front << "|||" << card.back << "\n";
+    }
+
+    outFile.close();
+}
+
+static vector<Card> loadDeck(const string& filename)
+{
+    vector<Card> deck;
+    ifstream inFile(filename);
+
+    if (!inFile.is_open())
+    {
+        // No save file yet (first run) — just return an empty deck.
+        return deck;
+    }
+
+    string line;
+    while (getline(inFile, line))
+    {
+        size_t delimPos = line.find("|||");
+        if (delimPos == string::npos)
+            continue; // skip malformed lines instead of crashing
+
+        string front = line.substr(0, delimPos);
+        string back = line.substr(delimPos + 3); // +3 skips past "|||"
+
+        deck.push_back(newCard(front, back));
+    }
+
+    inFile.close();
+    return deck;
+}
+
 // Handles the "submit answer" action. Mirrors the body of the while(idCt > 0)
 // loop after getline() in the terminal version.
 static void submitAnswer(AppState& s)
@@ -119,6 +168,7 @@ static void submitAnswer(AppState& s)
 
     s.round++;
     s.answered = true;
+    saveDeck(s.deck, DECK_FILE); 
 }
 
 // Adds a newly-created card into the *active* part of the deck.
@@ -140,6 +190,7 @@ static void addCard(AppState& s, const string& term, const string& def)
     size_t justAdded = s.deck.size() - 1;
     swap(s.deck[justAdded], s.deck[s.idCt]);
     s.idCt++;
+    saveDeck(s.deck, DECK_FILE);  
 
     // If the session had already been marked complete (deck was empty of
     // active cards), this new card means there's something to study again.
@@ -251,6 +302,7 @@ static void RenderFlashcardUI(AppState& s)
     ImGui::End();
 }
 
+
 // ---------------------------------------------------------------------------
 // Boilerplate below is the standard Dear ImGui "SDL2 + OpenGL3" application
 // shell (init window/context, run event+render loop, teardown). You generally
@@ -265,11 +317,19 @@ int main(int, char**)
         return -1;
     }
 
+    #ifdef __APPLE__
+    const char* glsl_version = "#version 150";
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+#else
     const char* glsl_version = "#version 130";
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, 0);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+#endif
     SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
     SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
     SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
@@ -290,7 +350,7 @@ int main(int, char**)
     ImGui_ImplOpenGL3_Init(glsl_version);
 
     AppState state;
-    state.deck = makeDeck();
+    state.deck = loadDeck(DECK_FILE);
     restartSession(state);
 
     bool done = false;

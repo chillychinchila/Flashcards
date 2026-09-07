@@ -11,7 +11,14 @@ CXX = g++
 CXXFLAGS = -std=c++17 -O2 -I$(SRC_DIR) -I$(IMGUI_DIR) -I$(IMGUI_DIR)/backends
 CXXFLAGS += $(shell sdl2-config --cflags)
 
-LIBS = $(shell sdl2-config --libs) -lGL -ldl -lpthread
+UNAME_S := $(shell uname -s)
+ifeq ($(UNAME_S),Darwin)
+    GL_LIBS = -framework OpenGL
+else
+    GL_LIBS = -lGL
+endif
+
+LIBS = $(shell sdl2-config --libs) $(GL_LIBS) -ldl -lpthread
 
 TARGET = flashcards_gui
 
