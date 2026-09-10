@@ -235,6 +235,10 @@ static void RenderFlashcardUI(AppState& s)
 
     ImGui::SetWindowFontScale(1.4f);
 
+    //live color editor?
+    ImGui::ShowStyleEditor();
+    //
+
     if (s.sessionComplete)
     {
         ImGui::Dummy(ImVec2(0, 40));
@@ -286,6 +290,7 @@ static void RenderFlashcardUI(AppState& s)
             if (ImGui::Button("Next card", ImVec2(150, 45)))
                 pickNextCard(s);
         }
+
     }
 
     // --- Add a card at runtime ---------------------------------------------
@@ -383,6 +388,9 @@ int main(int, char**)
     ImGuiIO& io = ImGui::GetIO(); (void)io;
 
     ImGui::StyleColorsDark();
+
+    //adding font
+    io.Fonts->AddFontFromFileTTF("fonts/Maven_Pro/MavenPro-VariableFont_wght.ttf", 20.0f);
 
     ImGui_ImplSDL2_InitForOpenGL(window, gl_context);
     ImGui_ImplOpenGL3_Init(glsl_version);
