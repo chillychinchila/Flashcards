@@ -201,6 +201,27 @@ static void addCard(AppState& s, const string& term, const string& def)
     }
 }
 
+static void deleteCard(AppState& s, int index)
+{
+    if (index < 0 || index >= (int)s.deck.size())
+        return;
+
+    bool deletingCurrent = (index == s.currentIndex);
+    bool wasActive = (index < s.idCt);
+
+    s.deck.erase(s.deck.begin() + index);
+
+    if (wasActive)
+        s.idCt--;
+
+    if (deletingCurrent)
+        pickNextCard(s);
+    else if (s.currentIndex > index)
+        s.currentIndex--;
+
+    saveDeck(s.deck, DECK_FILE);
+}
+
 // ---------------------------------------------------------------------------
 // The actual UI. Called once per frame from the render loop below.
 // ---------------------------------------------------------------------------
@@ -297,6 +318,23 @@ static void RenderFlashcardUI(AppState& s)
         }
 
         ImGui::TextDisabled("Total cards in deck: %d", (int)s.deck.size());
+    }
+
+    if (ImGui::CollapsingHeader("Manage cards"))
+    {
+        for (int i = 0; i < (int)s.deck.size(); i++)
+        {
+            ImGui::PushID(i);
+            ImGui::TextWrapped("%s", s.deck[i].front.c_str());
+            ImGui::SameLine();
+            if (ImGui::Button("Delete"))
+            {
+                deleteCard(s, i);
+                ImGui::PopID();
+                break; // deck just changed size — stop looping this frame
+            }
+            ImGui::PopID();
+        }
     }
 
     ImGui::End();
