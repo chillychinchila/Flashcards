@@ -19,7 +19,7 @@ Requirements
 1. Install prerequisites
     git, C++ compiler, Homebrew (Mac only from brew.sh)
 2. Clone the repository
-    run "git clone [THE SSH FROM ORIGINAL REPOSITORY] and proceed to "cd flashcards-gui" to move into the project folder
+    run "git clone (https://github.com/chillychinchila/Flashcards.git) and proceed to "cd flashcards-gui" to move into the project folder
 3. Instal SDL2
     macOS: 'brew install sdl2' and run 'sdl2-config --version' to verify sld2 install
 4. Run the app
