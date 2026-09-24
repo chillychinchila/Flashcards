@@ -235,8 +235,8 @@ static void RenderFlashcardUI(AppState& s)
 
     ImGui::SetWindowFontScale(1.4f);
 
-    //live color editor?
-    ImGui::ShowStyleEditor();
+    //LIVE COLOR EDITOR
+    //ImGui::ShowStyleEditor();
     //
 
     if (s.sessionComplete)
